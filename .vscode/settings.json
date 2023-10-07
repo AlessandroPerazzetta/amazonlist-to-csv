@@ -1,0 +1,7 @@
+{
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-python.python",
+    "pylint.args": [
+        "--disable=C0103,W=621"
+    ],
+}
