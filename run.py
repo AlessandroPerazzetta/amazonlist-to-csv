@@ -9,7 +9,9 @@ import csv
 import os, errno
 import requests
 from bs4 import BeautifulSoup
+from enum import Enum
 from prettytable import PrettyTable
+from prettytable.colortable import ColorTable, Themes, Theme
 
 # HEADERS ={"User-Agent":'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36'}
 HEADERS = {"User-Agent": 'FakeAgent/6.9 (FakeOS 1337; FakeOS; xQ) FakeWebKit/0.666 (KHTML, like Gecko) FakeCrawler/0'}
@@ -152,22 +154,138 @@ def parse_content(url_to_parse=''):
     except requests.exceptions.RequestException as err:
         print("OOps: Something Else", err)
 
-def show_table(csv_items=None):
-    pt = PrettyTable()
-    pt.field_names = ['Description', 'Price', 'Quantity', 'HA']
+class Styles(Enum): 
+    DEFAULT =       Theme(default_color="", vertical_color="", horizontal_color="", junction_color="")
+    OCEANYELLOW =   Theme(default_color="22", vertical_color="33", horizontal_color="44", junction_color="55")
+    LINES =         Theme(default_color="1", vertical_color="9", horizontal_color="9", junction_color="9")
+    
+    LIGHT =         Theme(default_color="7", vertical_color="", horizontal_color="", junction_color="")
+    DARK =          Theme(default_color="2", vertical_color="7", horizontal_color="7", junction_color="7")
+    
+    BLINK =         Theme(default_color="5", vertical_color="5", horizontal_color="5", junction_color="5")
 
-    pt.align['Description'] = "l"
-    pt.align['Price'] = "c"
-    pt.align['Quantity'] = "c"
-    pt.align['HA'] = "c"
+    DARKBGRED =     Theme(default_color="31", vertical_color="41", horizontal_color="41", junction_color="41")
+    DARKBGGREEN =   Theme(default_color="32", vertical_color="42", horizontal_color="42", junction_color="42")
+    DARKBGYELLOW =  Theme(default_color="33", vertical_color="43", horizontal_color="43", junction_color="43")
+    DARKBGBLU =     Theme(default_color="34", vertical_color="44", horizontal_color="44", junction_color="44")
+    DARKBGMAGENTA = Theme(default_color="35", vertical_color="45", horizontal_color="45", junction_color="45")
+    DARKBGCYANO =   Theme(default_color="36", vertical_color="46", horizontal_color="46", junction_color="46")
+    DARKBGGRAY =    Theme(default_color="37", vertical_color="47", horizontal_color="47", junction_color="47")
 
-    for description, price, quantity, ha in zip(
-            csv_items["descriptions"],
-            csv_items["prices"],
-            csv_items["quantities"],
-            csv_items["has"]):
-        pt.add_row([description, price, quantity, ha])
-    print(pt.get_string())
+    BGRED =         Theme(default_color="91", vertical_color="7", horizontal_color="7", junction_color="7")
+    BGGREEN =       Theme(default_color="92", vertical_color="7", horizontal_color="7", junction_color="7")
+    BGYELLOW =      Theme(default_color="93", vertical_color="7", horizontal_color="7", junction_color="7")
+    BGBLU =         Theme(default_color="94", vertical_color="7", horizontal_color="7", junction_color="7")
+    BGMAGENTA =     Theme(default_color="95", vertical_color="7", horizontal_color="7", junction_color="7")
+    BGCYANO =       Theme(default_color="96", vertical_color="7", horizontal_color="7", junction_color="7")
+    BGGRAY =        Theme(default_color="97", vertical_color="7", horizontal_color="7", junction_color="7")
+
+    TEST =          Theme(default_color="5", vertical_color="5", horizontal_color="5", junction_color="5")
+
+def show_all_themes():
+    """
+    0: normal
+    1: white
+    2: gray
+    3: italic
+    4: underline
+    5: blink
+    6: blink
+    7: bgwhite_fgblack
+    8: bgblack_fgblack
+    9: strike
+    10-20: normal
+    21: double underline
+    22-29: normal
+    30: dark_black
+    31: dark_red
+    32: dark_green
+    33: dark_yellow
+    34: dark_blu
+    35: dark_magenta
+    36: dark_cyano
+    37: dark_gray
+    38-39: normal
+    40: bgdark_black_fgwhite
+    41: bgdark_red_fgwhite
+    42: bgdark_green_fgwhite
+    43: bgdark_yellow_fgwhite
+    44: bgdark_blu_fgwhite
+    45: bgdark_magenta_fgwhite
+    46: bgdark_cyano_fgwhite
+    47: bgdark_gray_fgwhite
+    48-52: normal
+    53: upperline
+    54-89: normal
+    90: light_black
+    91: light_red
+    92: light_green
+    93: light_yellow
+    94: light_blu
+    95: light_magenta
+    96: light_cyano
+    97: light_gray
+    98-99: normal
+    100: bgblack_fgwhite
+    101: bgdarkred_fgwhite
+    102: bgdarkgreen_fgwhite
+    103: bgdarkyellow_fgwhite
+    104: bgdarkblu_fgwhite
+    105: bgdarkmagenta_fgwhite
+    106: bgdarkcyano_fgwhite
+    107: bgdarkgray_fgwhite
+    108-255: normal
+    """
+    for i in range(0,255):
+        print(f"Current index: {str(i)}")
+        pt = ColorTable(theme=Theme(default_color=str(i), vertical_color=str(i), horizontal_color=str(i), junction_color=str(i)))    
+        if pt:
+            pt.field_names = ['FieldA', 'FieldB', 'FieldC']
+
+            pt.align['FieldA'] = "l"
+            pt.align['FieldB'] = "c"
+            pt.align['FieldC'] = "c"
+
+            for r in range(0,3):
+                pt.add_row(['FieldA', 'FieldB', 'FieldC'])
+
+            print(pt.get_string())
+
+def get_theme(style=None):    
+    if style:
+        style = str(style).upper()
+        styles = [member.name for member in Styles]
+        if style in styles:
+            return Styles[style].value
+        else:
+            return Styles['DEFAULT'].value
+
+def show_table(csv_items=None, table_style=None):
+    pt = None
+    
+    if table_style is not None:
+        # print("Colortable")
+        # pt = ColorTable(theme=Themes.OCEAN)
+        pt = ColorTable(theme=get_theme(table_style))
+    else:
+        # print("Prettytable")
+        pt = PrettyTable()
+    
+    if pt:
+        pt.field_names = ['Description', 'Price', 'Quantity', 'HA']
+
+        pt.align['Description'] = "l"
+        pt.align['Price'] = "c"
+        pt.align['Quantity'] = "c"
+        pt.align['HA'] = "c"
+
+        for description, price, quantity, ha in zip(
+                csv_items["descriptions"],
+                csv_items["prices"],
+                csv_items["quantities"],
+                csv_items["has"]):
+            pt.add_row([description, price, quantity, ha])
+        print(pt.get_string())
 
 def divide_chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
@@ -209,7 +327,7 @@ if __name__ == '__main__':
             formatter_class=argparse.RawDescriptionHelpFormatter,
             epilog=textwrap.dedent('''\
             example:
-                ./run.py -u 'URL' -c 'file.csv' -v
+                ./run.py -u 'URL' -c 'file.csv' -d 'dest_dir' -t -s 'STYLE'
 
                 run with URL, in verbose mode writing results into file.csv.
             '''))
@@ -218,12 +336,21 @@ if __name__ == '__main__':
         parser.add_argument('-c', '--csv', metavar='CSV',
                             help='specify csv file to use')
         parser.add_argument('-d', '--dst', metavar='DST',
-                            help='specify csv file to use')
+                            help='specify csv dst dir to use')
         parser.add_argument('-t', '--table',
                             action="store_true", help='show table')
+        parser.add_argument('-s', '--style', metavar='STYLE',
+                            help='specify table style')
+        parser.add_argument('-ds', '--debugstyles',
+                            action="store_true", help='debug color themes')
         parser.add_argument('-v', '--verbose',
                             action="store_true", help='show info')
         args = parser.parse_args()
+
+        # ** Debug colors for table and exit
+        if args.debugstyles:
+            show_all_themes()
+            exit(0)
 
         # ** Manage URL from args and replace default
         if args.url:
@@ -265,7 +392,7 @@ if __name__ == '__main__':
 
             # ** Show table with parsed content
             if args.table:
-                show_table(list_items)
+                show_table(list_items, args.style)
 
         except Exception as error:
             print(f'ERROR: {repr(error)}')

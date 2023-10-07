@@ -37,10 +37,12 @@ Usage:
   run.py -c ....                          # (optional) csv filename output
   run.py -d ....                          # (optional) destination output dir
   run.py -t                               # (optional) show ascii table
+  run.py -s ....                          # (optional) show ascii table with style
+  run.py -ds                              # (optional) debug colors for table
 
 Examples:
 
-  $ ./run.py -u 'https://www.amazon.it/hz/wishlist/printview/xxxxxx?target=_blank&ref_=lv_pv&filter=unpurchased&sort=default' -c 'out' -d 'outdir' -t`
+  $ ./run.py -u 'https://www.amazon.it/hz/wishlist/printview/xxxxxx?target=_blank&ref_=lv_pv&filter=unpurchased&sort=default' -c 'out' -d 'outdir' -t -s 'STYLE'`
 
 ```
 
