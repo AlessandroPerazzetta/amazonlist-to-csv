@@ -6,6 +6,7 @@ import argparse
 import textwrap
 from datetime import datetime
 import csv
+import os, errno
 import requests
 from bs4 import BeautifulSoup
 from prettytable import PrettyTable
@@ -35,18 +36,21 @@ HEADERS = {"User-Agent": 'FakeAgent/6.9 (FakeOS 1337; FakeOS; xQ) FakeWebKit/0.6
 # </tr>
 
 
-def save_content(csv_file='', csv_title='', csv_items=None):
+def save_content(dst_dir='', csv_file='', csv_title='', csv_items=None):
     """Save parsed content to csv file."""
 
     # current date and time
     now_str = datetime.now().strftime("%Y%m%d%H%M%S")
     # now_str = now.strftime("%Y%m%d%H%M%S")
-    csv_file += f"{csv_file}_{now_str}"
+    if csv_file:
+        csv_file = f"{csv_file}_{now_str}"
+    else:
+        csv_file = f"{now_str}"
 
     if ".csv" not in csv_file:
         csv_file += ".csv"
 
-    filename = f"{csv_title}_{csv_file}"
+    filename = f"{dst_dir}/{csv_title}_{csv_file}"
 
     with open(filename, 'w', newline='', encoding="utf-8") as csvfile:
         csv_writer = csv.writer(csvfile, delimiter=';',
@@ -151,7 +155,7 @@ def parse_content(url_to_parse=''):
 def show_table(csv_items=None):
     pt = PrettyTable()
     pt.field_names = ['Description', 'Price', 'Quantity', 'HA']
-    
+
     pt.align['Description'] = "l"
     pt.align['Price'] = "c"
     pt.align['Quantity'] = "c"
@@ -193,6 +197,7 @@ if __name__ == '__main__':
         # ** Init from config
         URL_TO_PARSE = ''
         CSV_FILE = ''
+        DST_DIR = ''
 
         # ** Parse command line arguments
         # ** ASCII art is verrrry nice: https://www.asciiart.eu/text-to-ascii-art
@@ -212,6 +217,8 @@ if __name__ == '__main__':
                             help='specify url to parse')
         parser.add_argument('-c', '--csv', metavar='CSV',
                             help='specify csv file to use')
+        parser.add_argument('-d', '--dst', metavar='DST',
+                            help='specify csv file to use')
         parser.add_argument('-t', '--table',
                             action="store_true", help='show table')
         parser.add_argument('-v', '--verbose',
@@ -229,6 +236,15 @@ if __name__ == '__main__':
         if args.csv:
             CSV_FILE = args.csv
 
+        # ** Manage DST from args and replace default
+        if args.dst:
+            try:
+                os.makedirs(args.dst)
+            except FileExistsError:
+                # directory already exists
+                pass
+            DST_DIR = args.dst
+
         # ** Write to CSV file
         try:
             title, images, descriptions, prices, quantities, has = parse_content(
@@ -241,7 +257,7 @@ if __name__ == '__main__':
                 "quantities": quantities,
                 "has": has
             }
-            save_content(CSV_FILE, title, list_items)
+            save_content(DST_DIR, CSV_FILE, title, list_items)
 
             # ** Show table with parsed content
             if args.table:
