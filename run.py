@@ -244,7 +244,7 @@ if __name__ == '__main__':
                 # directory already exists
                 pass
             except OSError as error:
-                print(f"Unable to create directory {args.dst}: {error}")
+                print(f"Error: Unable to create directory {args.dst}: {error}")
                 exit(0)
 
             DST_DIR = args.dst
