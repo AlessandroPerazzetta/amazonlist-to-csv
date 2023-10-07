@@ -25,7 +25,7 @@ You can clone repository using [github](https://github.com/AlessandroPerazzetta/
     - requests >= 2.31.0
     - lxml >= 4.9.3
     - bs4 >= 0.0.1
-    - prettytable>=3.9.0
+    - prettytable >= 3.9.0
 ```
 ## Usage 
 
