@@ -40,7 +40,7 @@ Usage:
 
 Examples:
 
-  $ ./run.py -u 'https://www.amazon.it/hz/wishlist/printview/xxxxxx?target=_blank&ref_=lv_pv&filter=unpurchased&sort=default' -c 'out' -t`
+  $ ./run.py -u 'https://www.amazon.it/hz/wishlist/printview/xxxxxx?target=_blank&ref_=lv_pv&filter=unpurchased&sort=default' -c 'out' -d 'outdir' -t`
 
 ```
 
