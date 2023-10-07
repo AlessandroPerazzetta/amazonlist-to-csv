@@ -151,18 +151,17 @@ def parse_content(url_to_parse=''):
 def show_table(csv_items=None):
     pt = PrettyTable()
     pt.field_names = ['Description', 'Price', 'Quantity', 'HA']
+    
+    pt.align['Description'] = "l"
+    pt.align['Price'] = "c"
+    pt.align['Quantity'] = "c"
+    pt.align['HA'] = "c"
 
     for description, price, quantity, ha in zip(
             csv_items["descriptions"],
             csv_items["prices"],
             csv_items["quantities"],
             csv_items["has"]):
-
-        pt.align['Description'] = "l"
-        pt.align['Price'] = "c"
-        pt.align['Quantity'] = "c"
-        pt.align['HA'] = "c"
-
         pt.add_row([description, price, quantity, ha])
     print(pt.get_string())
 
