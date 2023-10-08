@@ -40,6 +40,7 @@ HEADERS = {"User-Agent": 'FakeAgent/6.9 (FakeOS 1337; FakeOS; xQ) FakeWebKit/0.6
 
 def create_dir(new_dir):
     """Try to create dir."""
+
     try:
         os.makedirs(new_dir)
     except FileExistsError:
@@ -88,6 +89,7 @@ def save_content(dst_dir='', csv_file='', csv_title='', csv_items=None, save_ima
 
 def save_image(dst_dir='', image_url=''):
     """Save images from url."""
+
     # filename = unquote(urlparse(image_url).path)
     image_filename = unquote(urlparse(image_url).path.split("/")[-1])
     filename = f"{dst_dir}/{image_filename}"
@@ -188,6 +190,7 @@ def parse_content(url_to_parse=''):
 
 class Styles(Enum):
     """Table Styles definition."""
+
     DEFAULT =       Theme(default_color="", vertical_color="", horizontal_color="", junction_color="")
     OCEANYELLOW =   Theme(default_color="22", vertical_color="33", horizontal_color="44", junction_color="55")
     LINES =         Theme(default_color="1", vertical_color="9", horizontal_color="9", junction_color="9")
@@ -213,7 +216,8 @@ class Styles(Enum):
     TEST =          Theme(default_color="5", vertical_color="5", horizontal_color="5", junction_color="5")
 
 def show_all_themes():
-    """
+    """Debug fun to show all colors.
+
     0: normal
     1: white
     2: gray
@@ -286,6 +290,7 @@ def show_all_themes():
 
 def get_theme(style=None):
     """Get theme for table."""
+
     if style:
         style = str(style).upper()
         styles = [member.name for member in Styles]
@@ -296,6 +301,7 @@ def get_theme(style=None):
 
 def show_table(csv_items=None, table_style=None):
     """Show table from content."""
+
     pt = None
     if table_style is not None:
         # print("Colortable")
