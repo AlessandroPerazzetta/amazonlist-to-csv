@@ -35,6 +35,7 @@ Usage:
 
   run.py -u ....                          # amazon list url to parse
   run.py -c ....                          # (optional) csv filename output
+  run.py -i                               # (optional) save images from content
   run.py -d ....                          # (optional) destination output dir
   run.py -t                               # (optional) show ascii table
   run.py -s ....                          # (optional) show ascii table with style

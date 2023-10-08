@@ -6,10 +6,11 @@ import argparse
 import textwrap
 from datetime import datetime
 import csv
-import os, errno
+import os
+from enum import Enum
+from urllib.parse import urlparse, unquote
 import requests
 from bs4 import BeautifulSoup
-from enum import Enum
 from prettytable import PrettyTable
 from prettytable.colortable import ColorTable, Themes, Theme
 
@@ -38,7 +39,7 @@ HEADERS = {"User-Agent": 'FakeAgent/6.9 (FakeOS 1337; FakeOS; xQ) FakeWebKit/0.6
 # </tr>
 
 
-def save_content(dst_dir='', csv_file='', csv_title='', csv_items=None):
+def save_content(dst_dir='', csv_file='', csv_title='', csv_items=None, save_images=False):
     """Save parsed content to csv file."""
 
     # current date and time
@@ -70,7 +71,26 @@ def save_content(dst_dir='', csv_file='', csv_title='', csv_items=None):
             csv_writer.writerow(
                 [image, description, price, quantity, ha]
             )
+            if save_images:
+                save_image(dst_dir, image)
 
+def save_image(dst_dir='', image_url=''):
+    """Save images from url."""
+    # filename = unquote(urlparse(image_url).path)
+    image_filename = unquote(urlparse(image_url).path.split("/")[-1])
+    filename = f"{dst_dir}/{image_filename}"
+
+    with open(filename, 'wb') as handle:
+        response = requests.get(image_url, stream=True, timeout=5)
+
+        if not response.ok:
+            print(response)
+
+        for block in response.iter_content(1024):
+            if not block:
+                break
+
+            handle.write(block)
 
 def parse_content(url_to_parse=''):
     """Parse Amazon list and extract all items to separate list."""
@@ -154,16 +174,14 @@ def parse_content(url_to_parse=''):
     except requests.exceptions.RequestException as err:
         print("OOps: Something Else", err)
 
-class Styles(Enum): 
+class Styles(Enum):
+    """Table Styles definition."""
     DEFAULT =       Theme(default_color="", vertical_color="", horizontal_color="", junction_color="")
     OCEANYELLOW =   Theme(default_color="22", vertical_color="33", horizontal_color="44", junction_color="55")
     LINES =         Theme(default_color="1", vertical_color="9", horizontal_color="9", junction_color="9")
-    
     LIGHT =         Theme(default_color="7", vertical_color="", horizontal_color="", junction_color="")
     DARK =          Theme(default_color="2", vertical_color="7", horizontal_color="7", junction_color="7")
-    
     BLINK =         Theme(default_color="5", vertical_color="5", horizontal_color="5", junction_color="5")
-
     DARKBGRED =     Theme(default_color="31", vertical_color="41", horizontal_color="41", junction_color="41")
     DARKBGGREEN =   Theme(default_color="32", vertical_color="42", horizontal_color="42", junction_color="42")
     DARKBGYELLOW =  Theme(default_color="33", vertical_color="43", horizontal_color="43", junction_color="43")
@@ -238,7 +256,10 @@ def show_all_themes():
     """
     for i in range(0,255):
         print(f"Current index: {str(i)}")
-        pt = ColorTable(theme=Theme(default_color=str(i), vertical_color=str(i), horizontal_color=str(i), junction_color=str(i)))    
+        pt = ColorTable(theme=Theme(default_color=str(i),
+                                    vertical_color=str(i),
+                                    horizontal_color=str(i),
+                                    junction_color=str(i)))
         if pt:
             pt.field_names = ['FieldA', 'FieldB', 'FieldC']
 
@@ -251,7 +272,8 @@ def show_all_themes():
 
             print(pt.get_string())
 
-def get_theme(style=None):    
+def get_theme(style=None):
+    """Get theme for table."""
     if style:
         style = str(style).upper()
         styles = [member.name for member in Styles]
@@ -261,8 +283,8 @@ def get_theme(style=None):
             return Styles['DEFAULT'].value
 
 def show_table(csv_items=None, table_style=None):
+    """Show table from content."""
     pt = None
-    
     if table_style is not None:
         # print("Colortable")
         # pt = ColorTable(theme=Themes.OCEAN)
@@ -270,7 +292,7 @@ def show_table(csv_items=None, table_style=None):
     else:
         # print("Prettytable")
         pt = PrettyTable()
-    
+
     if pt:
         pt.field_names = ['Description', 'Price', 'Quantity', 'HA']
 
@@ -335,6 +357,8 @@ if __name__ == '__main__':
                             help='specify url to parse')
         parser.add_argument('-c', '--csv', metavar='CSV',
                             help='specify csv file to use')
+        parser.add_argument('-i', '--images',
+                            action="store_true", help='save images from content')
         parser.add_argument('-d', '--dst', metavar='DST',
                             help='specify csv dst dir to use')
         parser.add_argument('-t', '--table',
@@ -356,7 +380,7 @@ if __name__ == '__main__':
         if args.url:
             URL_TO_PARSE = args.url
         else:
-            print(f"Error: URL to parse not found")
+            print("Error: URL to parse not found")
             exit(0)
 
         # ** Manage CSV from args and replace default
@@ -388,7 +412,7 @@ if __name__ == '__main__':
                 "quantities": quantities,
                 "has": has
             }
-            save_content(DST_DIR, CSV_FILE, title, list_items)
+            save_content(DST_DIR, CSV_FILE, title, list_items, args.images)
 
             # ** Show table with parsed content
             if args.table:
