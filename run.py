@@ -38,6 +38,16 @@ HEADERS = {"User-Agent": 'FakeAgent/6.9 (FakeOS 1337; FakeOS; xQ) FakeWebKit/0.6
 #     </td>
 # </tr>
 
+def create_dir(new_dir):
+    """Try to create dir."""
+    try:
+        os.makedirs(new_dir)
+    except FileExistsError:
+        # directory already exists
+        pass
+    except OSError as create_dir_error:
+        print(f"Error: Unable to create directory {new_dir}: {create_dir_error}")
+        exit(0)
 
 def save_content(dst_dir='', csv_file='', csv_title='', csv_items=None, save_images=False):
     """Save parsed content to csv file."""
@@ -72,7 +82,9 @@ def save_content(dst_dir='', csv_file='', csv_title='', csv_items=None, save_ima
                 [image, description, price, quantity, ha]
             )
             if save_images:
-                save_image(dst_dir, image)
+                images_dst_dir = f"{dst_dir}/{csv_title}/"
+                create_dir(images_dst_dir)
+                save_image(images_dst_dir, image)
 
 def save_image(dst_dir='', image_url=''):
     """Save images from url."""
@@ -337,6 +349,7 @@ if __name__ == '__main__':
         # ** Init from config
         URL_TO_PARSE = ''
         CSV_FILE = ''
+        SAVE_IMAGES = False
         DST_DIR = ''
 
         # ** Parse command line arguments
@@ -387,17 +400,13 @@ if __name__ == '__main__':
         if args.csv:
             CSV_FILE = args.csv
 
+        # ** Manage images from args and replace default
+        if args.images:
+            SAVE_IMAGES = args.images
+
         # ** Manage DST from args and replace default
         if args.dst:
-            try:
-                os.makedirs(args.dst)
-            except FileExistsError:
-                # directory already exists
-                pass
-            except OSError as error:
-                print(f"Error: Unable to create directory {args.dst}: {error}")
-                exit(0)
-
+            create_dir(args.dst)
             DST_DIR = args.dst
 
         # ** Write to CSV file
@@ -412,11 +421,16 @@ if __name__ == '__main__':
                 "quantities": quantities,
                 "has": has
             }
-            save_content(DST_DIR, CSV_FILE, title, list_items, args.images)
+            save_content(DST_DIR, CSV_FILE, title, list_items, SAVE_IMAGES)
+
+            # ** Manage images from args and replace default
+            USER_STYLE = None
+            if args.style:
+                USER_STYLE = args.style
 
             # ** Show table with parsed content
             if args.table:
-                show_table(list_items, args.style)
+                show_table(list_items, USER_STYLE)
 
         except Exception as error:
             print(f'ERROR: {repr(error)}')
